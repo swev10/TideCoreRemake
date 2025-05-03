@@ -1,0 +1,33 @@
+name: TideCore
+version: 1.0
+main: com.tideCore.TideCore
+api-version: 1.20
+author: SwevMC
+description: Core farming + booster + prestige system
+depend:
+  - Vault
+softdepend:
+  - PlaceholderAPI
+  - WorldGuard
+  - WorldEdit
+
+commands:
+  upgradestations:
+    description: Reloads upgrade stations.
+    permission: tidecore.admin
+  tidecore:
+    description: Main command handler
+    usage: /<command>
+    permission: tidecore.admin
+    aliases: [tc]
+  pearlshop:
+    description: Opens the pearl shop
+  prestige:
+    description: Opens the prestige GUI
+    usage: /prestige
+    permission: tidecore.prestige
+    permission-message: You do not have permission.
+
+permissions:
+  tidecore.admin:
+    default: op
