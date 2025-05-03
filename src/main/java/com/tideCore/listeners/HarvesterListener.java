@@ -76,7 +76,6 @@ public class HarvesterListener implements Listener {
         int baseTokens = 1;
         double baseMoney = 2.50;
 
-        // Apply enchant multipliers
         int tokenLevel = PlayerDataManager.getHoeEnchant(player, "tokenfinder");
         int expLevel = PlayerDataManager.getHoeEnchant(player, "expfinder");
         int moneyLevel = PlayerDataManager.getHoeEnchant(player, "moneyfinder");
@@ -88,18 +87,15 @@ public class HarvesterListener implements Listener {
         int boostedXP = BoosterManager.getBoostedXP(rawXP, player);
         int levelBefore = PlayerDataManager.getLevel(player);
 
-        // Apply rewards
         PlayerDataManager.addXP(player, boostedXP);
         PlayerDataManager.addTokens(player, tokens);
         TideCore.getEconomy().depositPlayer(player, money);
 
-        // Level up title
         int levelAfter = PlayerDataManager.getLevel(player);
         if (levelAfter > levelBefore) {
             player.sendTitle("§a⬆ LEVEL UP!", "§7Level " + levelAfter, 10, 40, 10);
         }
 
-        // Action Bar
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                 new TextComponent("§8+§a$" + String.format("%.2f", money)
                         + " §8| §8+§b🧪 " + boostedXP + " XP §8| §8+§e★" + tokens + " Tokens"));
@@ -154,22 +150,22 @@ public class HarvesterListener implements Listener {
     }
 
     private void animateRegrow(Location location, Material crop) {
+        location.getBlock().setType(crop);
+
         new BukkitRunnable() {
             int stage = 0;
             final int maxStage = ((Ageable) Bukkit.createBlockData(crop)).getMaximumAge();
 
             @Override
             public void run() {
-                if (stage == 0) {
-                    location.getBlock().setType(crop);
-                }
                 if (location.getBlock().getType() != crop) {
-                    cancel();
-                    return;
+                    cancel(); return;
                 }
+
                 Ageable ageable = (Ageable) location.getBlock().getBlockData();
-                ageable.setAge(Math.min(stage, ageable.getMaximumAge()));
+                ageable.setAge(Math.min(stage, maxStage));
                 location.getBlock().setBlockData(ageable);
+
                 stage++;
                 if (stage > maxStage) cancel();
             }
