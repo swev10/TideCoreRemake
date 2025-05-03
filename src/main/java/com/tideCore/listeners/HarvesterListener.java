@@ -72,24 +72,37 @@ public class HarvesterListener implements Listener {
     }
 
     private void rewardPlayer(Player player) {
-        int xp = 5;
-        int tokens = 1;
-        double money = 2.50;
+        int baseXP = 5;
+        int baseTokens = 1;
+        double baseMoney = 2.50;
 
-        int boostedXP = BoosterManager.getBoostedXP(xp, player);
+        // Apply enchant multipliers
+        int tokenLevel = PlayerDataManager.getHoeEnchant(player, "tokenfinder");
+        int expLevel = PlayerDataManager.getHoeEnchant(player, "expfinder");
+        int moneyLevel = PlayerDataManager.getHoeEnchant(player, "moneyfinder");
+
+        int tokens = (int) Math.round(baseTokens + (baseTokens * 0.15 * tokenLevel));
+        int rawXP = (int) Math.round(baseXP + (baseXP * 0.10 * expLevel));
+        double money = baseMoney + (baseMoney * 0.05 * moneyLevel);
+
+        int boostedXP = BoosterManager.getBoostedXP(rawXP, player);
         int levelBefore = PlayerDataManager.getLevel(player);
 
+        // Apply rewards
         PlayerDataManager.addXP(player, boostedXP);
         PlayerDataManager.addTokens(player, tokens);
         TideCore.getEconomy().depositPlayer(player, money);
 
+        // Level up title
         int levelAfter = PlayerDataManager.getLevel(player);
         if (levelAfter > levelBefore) {
             player.sendTitle("§a⬆ LEVEL UP!", "§7Level " + levelAfter, 10, 40, 10);
         }
 
+        // Action Bar
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
-                new TextComponent("§8+§a$2.50 §8| §8+§b🧪 " + boostedXP + " XP §8| §8+§e★1 Token"));
+                new TextComponent("§8+§a$" + String.format("%.2f", money)
+                        + " §8| §8+§b🧪 " + boostedXP + " XP §8| §8+§e★" + tokens + " Tokens"));
     }
 
     private void tryEnchantEffects(Player player, Block center) {
